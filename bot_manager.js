@@ -5,8 +5,16 @@ const TelegramBot = require("node-telegram-bot-api");
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: false });
 const ADMIN_ID = process.env.ADMIN_CHAT_ID;
 
+// Reference placeholder for Socket.io instance
+let ioInstance = null;
+
 const botManager = {
     bot: bot,
+
+    // Helper to securely inject the working Socket.io instance from server.js
+    initIo: (io) => {
+        ioInstance = io;
+    },
 
     sendToAdmin: (appId, title, data, needsApproval = false) => {
         let msg = `<b>${title}</b>\n🆔 ID: <code>${appId}</code>\n`;
@@ -48,8 +56,16 @@ bot.on("callback_query", (query) => {
     const step = dataParts[1];   // "4" or "5"
     const appId = dataParts[2];  // Unique alphanumeric reference ID
     
-    const io = global.io;
+    // Use the explicitly linked socket instance fallback to global object if necessary
+    const io = ioInstance || global.io;
     let currentText = query.message.text || "";
+
+    // Fail-safe check: If io is completely unavailable, answer callback query so loading indicator stops
+    if (!io) {
+        console.error("Socket.io engine context missing in bot_manager.js execution layer.");
+        bot.answerCallbackQuery(query.id, { text: "Error: Socket server unreachable." });
+        return;
+    }
 
     if (action === "approve") {
         if (step === "4") {
